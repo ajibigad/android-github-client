@@ -9,6 +9,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,6 +39,17 @@ public class GithubUserDetailsActivity extends AppCompatActivity {
         final TextView usernameTextView = (TextView) findViewById(R.id.username);
         final TextView profileUrlTextView = (TextView) findViewById(R.id.profile_url);
         final SimpleDraweeView profileImageView = (SimpleDraweeView) findViewById(R.id.profile_picture);
+        ImageButton shareButton = (ImageButton) findViewById(R.id.share_btn);
+        shareButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String shareContent = String.format("Check out this awesome developer @%s, %s.", usernameTextView.getText().toString(), profileUrlTextView.getText().toString());
+                Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                shareIntent.setType("text/plain");
+                shareIntent.putExtra(Intent.EXTRA_TEXT, shareContent);
+                startActivity(shareIntent);
+            }
+        });
 
 //        profileUrlTextView.setOnClickListener(new View.OnClickListener() {
 //            @Override
