@@ -51,32 +51,6 @@ public class GithubUserDetailsActivity extends AppCompatActivity {
             }
         });
 
-//        profileUrlTextView.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Uri uri = Uri.parse("https://segunfamisa.com");
-//
-//                // create an intent builder
-//                CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder();
-//
-//                // Begin customizing
-//                // set toolbar colors
-//                intentBuilder.setToolbarColor(ContextCompat.getColor(this, R.color.colorPrimary));
-//                intentBuilder.setSecondaryToolbarColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
-//
-//                // set start and exit animations
-//                intentBuilder.setStartAnimations(this, R.anim.slide_in_right, R.anim.slide_out_left);
-//                intentBuilder.setExitAnimations(this, android.R.anim.slide_in_left,
-//                        android.R.anim.slide_out_right);
-//
-//                // build custom tabs intent
-//                CustomTabsIntent customTabsIntent = intentBuilder.build();
-//
-//                // launch the url
-//                customTabsIntent.launchUrl(activity, uri);
-//            }
-//        });
-
         Intent intent = getIntent();
 
         final String selectedUsername = intent.getStringExtra("selectedUsername");

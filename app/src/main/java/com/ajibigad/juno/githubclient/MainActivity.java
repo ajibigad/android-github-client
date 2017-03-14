@@ -29,8 +29,13 @@ public class MainActivity extends AppCompatActivity {
     private static String TAG = MainActivity.class.getSimpleName();
     GithubSearchService githubSearchService;
 
+    //int currentPage = 0;
+
     private RecyclerView.Adapter adapter;
+    private EndlessRecyclerViewScrollListener scrollListener;
     final List<GithubUser> githubUsers = new ArrayList<>();
+    private boolean isThereNextPage = true;
+    private ProgressBarHelper progressBarHelper;
 
 
     @Override
@@ -46,39 +51,57 @@ public class MainActivity extends AppCompatActivity {
         adapter = new GithubUserAdapter(githubUsers);
         githubUserView.setAdapter(adapter);
 
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         githubUserView.setLayoutManager(layoutManager);
 
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(githubUserView.getContext(),
                 DividerItemDecoration.VERTICAL);
         githubUserView.addItemDecoration(dividerItemDecoration);
 
-        final ProgressBarHelper progressBarHelper = new ProgressBarHelper(MainActivity.this);
-        progressBarHelper.showProgressDialog("Loading developers...");
+        scrollListener = new EndlessRecyclerViewScrollListener(layoutManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                loadPage(page + 1);
+            }
+        };
+        githubUserView.addOnScrollListener(scrollListener);
 
+        progressBarHelper = new ProgressBarHelper(MainActivity.this);
         githubSearchService = new GithubSearchService();
-        githubSearchService.getLagosJavaDevs().enqueue(new Callback<GithubResponse>() {
-            @Override
-            public void onResponse(Call<GithubResponse> call, Response<GithubResponse> response) {
-                if(response.isSuccessful()){
-                    Log.i(TAG, "Total github result " + response.body().getTotalCount());
-                    if(response.body().getTotalCount() > 0){
-                        githubUsers.addAll(response.body().getGithubUserList());
-                        Log.i(TAG, githubUsers.get(0).getUsername());
-                        adapter.notifyDataSetChanged();
-                    }
-                }else {
-                    Toast.makeText(MainActivity.this, "Request to github failed : " + response.message(), Toast.LENGTH_SHORT).show();
-                }
-                progressBarHelper.dismissProgressDialog();
-            }
+        loadPage(1); //load first page
+    }
 
-            @Override
-            public void onFailure(Call<GithubResponse> call, Throwable t) {
-                Toast.makeText(MainActivity.this, "Request to github failed at network level",  Toast.LENGTH_LONG).show();
-                progressBarHelper.dismissProgressDialog();
-            }
-        });
+    private void updateGithubUserList(List<GithubUser> newGithubUsers){
+        githubUsers.addAll(newGithubUsers);
+        adapter.notifyDataSetChanged();
+    }
+
+    private void loadPage(int page){
+        String dialogMessage = page == 1 ? "Loading developers..." : "Loading more developers...";
+        if(isThereNextPage){
+            progressBarHelper.showProgressDialog(dialogMessage);
+            githubSearchService.getLagosJavaDevs(page).enqueue(new Callback<GithubResponse>() {
+                @Override
+                public void onResponse(Call<GithubResponse> call, Response<GithubResponse> response) {
+                    if(response.isSuccessful()){
+                        Log.i(TAG, "Total github result " + response.body().getTotalCount());
+                        if(response.body().getTotalCount() > 0){
+                            updateGithubUserList(response.body().getGithubUserList());
+                        }
+                        isThereNextPage = response.headers().get("Link").contains("next");
+                    }else {
+                        Toast.makeText(MainActivity.this, "Request to github failed : " + response.message(), Toast.LENGTH_SHORT).show();
+                    }
+                    progressBarHelper.dismissProgressDialog();
+                }
+
+                @Override
+                public void onFailure(Call<GithubResponse> call, Throwable t) {
+                    Toast.makeText(MainActivity.this, "Request to github failed at network level",  Toast.LENGTH_LONG).show();
+                    progressBarHelper.dismissProgressDialog();
+                }
+            });
+        }
 
     }
 

@@ -30,8 +30,8 @@ public class GithubSearchService extends Client implements GithubSearchInterface
     }
 
     @Override
-    public Call<GithubResponse> getLagosJavaDevs() {
-        return searchService.getLagosJavaDevs();
+    public Call<GithubResponse> getLagosJavaDevs(int page) {
+        return searchService.getLagosJavaDevs(page);
     }
 
     @Override
