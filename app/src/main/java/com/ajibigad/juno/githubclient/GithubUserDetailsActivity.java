@@ -8,6 +8,8 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -27,6 +29,11 @@ import retrofit2.Response;
 
 public class GithubUserDetailsActivity extends AppCompatActivity {
 
+    private TextView usernameTextView;
+    private TextView profileUrlTextView;
+    private SimpleDraweeView profileImageView;
+    private ImageButton shareButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,18 +43,14 @@ public class GithubUserDetailsActivity extends AppCompatActivity {
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        final TextView usernameTextView = (TextView) findViewById(R.id.username);
-        final TextView profileUrlTextView = (TextView) findViewById(R.id.profile_url);
-        final SimpleDraweeView profileImageView = (SimpleDraweeView) findViewById(R.id.profile_picture);
+        usernameTextView = (TextView) findViewById(R.id.username);
+        profileUrlTextView = (TextView) findViewById(R.id.profile_url);
+        profileImageView = (SimpleDraweeView) findViewById(R.id.profile_picture);
         ImageButton shareButton = (ImageButton) findViewById(R.id.share_btn);
         shareButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String shareContent = String.format("Check out this awesome developer @%s, %s.", usernameTextView.getText().toString(), profileUrlTextView.getText().toString());
-                Intent shareIntent = new Intent(Intent.ACTION_SEND);
-                shareIntent.setType("text/plain");
-                shareIntent.putExtra(Intent.EXTRA_TEXT, shareContent);
-                startActivity(shareIntent);
+                triggerShareAction();
             }
         });
 
@@ -85,6 +88,37 @@ public class GithubUserDetailsActivity extends AppCompatActivity {
                 Toast.makeText(GithubUserDetailsActivity.this, "Network error", Toast.LENGTH_SHORT).show();
             }
         });
+ ;   }
+
+    private void triggerShareAction(){
+        String shareContent = String.format("Check out this awesome developer @%s, %s", usernameTextView.getText().toString(), profileUrlTextView.getText().toString());
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("text/plain");
+        shareIntent.putExtra(Intent.EXTRA_TEXT, shareContent);
+        startActivity(shareIntent);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_user_details, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_share) {
+            triggerShareAction();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
 }
